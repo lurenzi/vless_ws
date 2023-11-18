@@ -1,8 +1,8 @@
 #!/bin/bash
-# Auth: json-vvhello
-# Desc: xray installation script
-# Plat: ubuntu 20.04
-# Eg  : bash xray_installation_vless.sh "你的域名" [vless]
+# json-vvhello
+# xray installation script
+# ubuntu 20.04
+# bash xray_installation_vless.sh "你的域名" [vless]
 
 if [ "$1" == "" ];then
   echo "请输入需要申请证书的域名：(bash acme_domain.sh 域名)"
@@ -75,36 +75,42 @@ mkdir -pv /usr/local/etc/xray
 # 配置nginx
 echo "
 server {
-	listen 80;
-	server_name "$domainName";
-	return 301 https://"'$host'""'$request_uri'";
-
+  listen 80;
+  listen [::]:80;
+  server_name "$domainName";
+  return 301 https://"'$host'""'$request_uri'";
 }
-server {
-	listen 443 ssl http2 default_server;
-	listen [::]:443 ssl http2 default_server;
-	server_name "$domainName";
 
-	ssl_certificate $ssl_dir/xray.crt;
-	ssl_certificate_key $ssl_dir/xray.key;
-	ssl_ciphers EECDH+CHACHA20:EECDH+CHACHA20-draft:EECDH+ECDSA+AES128:EECDH+aRSA+AES128:RSA+AES128:EECDH+ECDSA+AES256:EECDH+aRSA+AES256:RSA+AES256:EECDH+ECDSA+3DES:EECDH+aRSA+3DES:RSA+3DES:!MD5;
-	ssl_protocols TLSv1.1 TLSv1.2 TLSv1.3;
+server {
+  listen 443 ssl http2 default_server;
+  listen [::]:443 ssl http2 default_server;
+  server_name "$domainName";
+  charset utf-8;
+
+  ssl_protocols TLSv1.1 TLSv1.2 TLSv1.3;
+  ssl_ciphers EECDH+CHACHA20:EECDH+CHACHA20-draft:EECDH+ECDSA+AES128:EECDH+aRSA+AES128:RSA+AES128:EECDH+ECDSA+AES256:EECDH+aRSA+AES256:RSA+AES256:EECDH+ECDSA+3DES:EECDH+aRSA+3DES:RSA+3DES:!MD5;
+  ssl_ecdh_curve secp384r1;
+  ssl_prefer_server_ciphers on;
+  ssl_session_cache shared:SSL:10m;
+  ssl_session_timeout 10m;
+  ssl_session_tickets off;
+  ssl_certificate $ssl_dir/xray.crt;
+  ssl_certificate_key $ssl_dir/xray.key;
 
   location / {
       proxy_pass https://www.aliexpress.com;
   }
 
-	location "$path" {
-		proxy_redirect off;
-		proxy_pass http://127.0.0.1:"$port";
-		proxy_http_version 1.1;
-		proxy_set_header Upgrade "'"$http_upgrade"'";
-		proxy_set_header Connection '"'upgrade'"';
-            	proxy_set_header Host "'"$host"'";
-            	proxy_set_header X-Real-IP "'"$remote_addr"'";
-            	proxy_set_header X-Forwarded-For "'"$proxy_add_x_forwarded_for"'";
+  location "$path" {
+    proxy_redirect off;
+    proxy_pass http://127.0.0.1:"$port";
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade "'"$http_upgrade"'";
+    proxy_set_header Connection '"'upgrade'"';
+    proxy_set_header Host "'"$host"'";
+    proxy_set_header X-Real-IP "'"$remote_addr"'";
+    proxy_set_header X-Forwarded-For "'"$proxy_add_x_forwarded_for"'";
 	}
-
 }
 " > $nginxConfig
 
