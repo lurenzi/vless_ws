@@ -68,7 +68,7 @@ echo -n '#!/bin/bash
 /etc/init.d/nginx start
 ' > /usr/local/bin/ssl_renew.sh
 chmod +x /usr/local/bin/ssl_renew.sh
-(crontab -l;echo "0 00 15 * * /usr/local/bin/ssl_renew.sh") | crontab
+(crontab -l;echo "0 0 15 * * /usr/local/bin/ssl_renew.sh") | crontab
 
 mkdir -pv /usr/local/etc/xray
 
