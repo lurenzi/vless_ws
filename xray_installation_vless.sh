@@ -70,8 +70,6 @@ echo -n '#!/bin/bash
 chmod +x /usr/local/bin/ssl_renew.sh
 (crontab -l;echo "0 0 15 * * /usr/local/bin/ssl_renew.sh") | crontab
 
-mkdir -pv /usr/local/etc/xray
-
 # 配置nginx
 echo "
 server {
@@ -114,7 +112,8 @@ server {
 }
 " > $nginxConfig
 
-
+# xray的配置文件路径
+mkdir -pv /usr/local/etc/xray
 # 配置xray
 echo '
 {
